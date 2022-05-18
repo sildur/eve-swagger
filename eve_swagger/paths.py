@@ -111,6 +111,17 @@ def get_ref_ifmatch():
     return {"$ref": "#/components/parameters/If-Match"}
 
 
+def get_custom_headers():
+    custom_headers = []
+    if app.config["SWAGGER_CUSTOM_HEADERS"]:
+        for header in app.config["SWAGGER_CUSTOM_HEADERS"]:
+            key = header["name"]
+            custom_headers.append(
+                {"$ref": f'#/components/parameters/{key}'}
+            )
+    return custom_headers
+
+
 def get_ref_requestBody(rd):
     return {"$ref": "#/components/requestBodies/%s" % rd["item_title"]}
 
@@ -171,7 +182,7 @@ def get_response(rd):
                     "default": get_ref_response("error"),
                 },
             ),
-            ("parameters", get_ref_query()),
+            ("parameters", get_ref_query() + get_custom_headers()),
             ("operationId", "get" + title),
             ("tags", [rd["item_title"]]),
         ]
@@ -201,7 +212,7 @@ def post_response(rd):
                     "default": get_ref_response("error"),
                 },
             ),
-            ("parameters", []),
+            ("parameters", get_custom_headers()),
             ("operationId", "post" + rd["resource_title"]),
             ("tags", [rd["item_title"]]),
         ]
@@ -222,7 +233,7 @@ def delete_response(rd):
                     "default": get_ref_response("error"),
                 },
             ),
-            ("parameters", []),
+            ("parameters", get_custom_headers()),
             ("operationId", "delete" + rd["resource_title"]),
             ("tags", [rd["item_title"]]),
         ]
@@ -251,7 +262,7 @@ def getitem_response_additional_lookup(rd):
                     "default": get_ref_response("error"),
                 },
             ),
-            ("parameters", [additional_lookup_parameter(rd)]),
+            ("parameters", [additional_lookup_parameter(rd)] + get_custom_headers()),
             ("operationId", "get" + title + "ItemBy" + field.title()),
             ("tags", [rd["item_title"]]),
         ]
@@ -279,7 +290,7 @@ def getitem_response(rd):
                     "default": get_ref_response("error"),
                 },
             ),
-            ("parameters", [id_parameter(rd)]),
+            ("parameters", [id_parameter(rd)] + get_custom_headers()),
             ("operationId", "get" + title + "Item"),
             ("tags", [rd["item_title"]]),
         ]
@@ -302,7 +313,7 @@ def put_response(rd):
                 },
             ),
             ("requestBody", get_ref_requestBody(rd)),
-            ("parameters", [id_parameter(rd), get_ref_ifmatch()]),
+            ("parameters", [id_parameter(rd), get_ref_ifmatch()] + get_custom_headers()),
             ("operationId", "put" + title + "Item"),
             ("tags", [title]),
         ]
@@ -325,7 +336,7 @@ def patch_response(rd):
                 },
             ),
             ("requestBody", get_ref_requestBody(rd)),
-            ("parameters", [id_parameter(rd), get_ref_ifmatch()]),
+            ("parameters", [id_parameter(rd), get_ref_ifmatch()] + get_custom_headers()),
             ("operationId", "patch" + title + "Item"),
             ("tags", [title]),
         ]
@@ -347,7 +358,7 @@ def deleteitem_response(rd):
                     "default": get_ref_response("error"),
                 },
             ),
-            ("parameters", [id_parameter(rd), get_ref_ifmatch()]),
+            ("parameters", [id_parameter(rd), get_ref_ifmatch()] + get_custom_headers()),
             ("operationId", "delete" + title + "Item"),
             ("tags", [rd["item_title"]]),
         ]

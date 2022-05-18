@@ -179,7 +179,16 @@ def _header_parameters():
     r["description"] = "Current value of the _etag field"
     r["required"] = app.config["IF_MATCH"] and app.config["ENFORCE_IF_MATCH"]
     r["schema"] = {"type": "string"}
-    return {"If-Match": r}
+    header_params = {"If-Match": r}
+
+    # global custom headers
+    if app.config["SWAGGER_CUSTOM_HEADERS"]:
+        for header in app.config["SWAGGER_CUSTOM_HEADERS"]:
+            key = header["name"]
+            if key not in header_params.keys():
+                header_params[key] = header
+
+    return header_params
 
 
 def examples():
